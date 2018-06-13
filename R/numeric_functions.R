@@ -77,34 +77,77 @@ all.equal(attributes(test2)$range_fails,
 
 
 
-numeric_slope_checker <- function(x) {
+numeric_slope_checker <- function(dat1, dat2) {
   
-  # Description: 
-  
+  # Description: test sensor drift, 
   # Inputs:
-  
   # Returns:
-  
   # Tests:
-  
   # Examples:
-  
-  # Team members: Celeste
-  
 }
+
+#
+dat <- 
 
 numeric_step_checker <- function(x) {
   
   # Description: 
-  
   # Inputs:
-  
   # Returns:
-  
   # Tests:
-  
   # Examples:
   
-  # Team members: Celeste
+}
+
+numeric_spike_window_checker <- function(dat, 
+                                         spike_value = c(3, 5), 
+                                         verbose=FALSE) {
+  # use 5 element moving window to detect spikes
+  lag1<-c(NA,head(dat$value,-1)) # lag-1
+  lagMinus1<-c(tail(dat$value,-1),NA) # lag+1
+  lag2<-c(NA,NA,head(dat$value,-2)) # lag-2
+  lagMinus2<-c(tail(dat$value,-2),NA,NA) # lag+2
+  s<-cbind(lag1,lagMinus1,lag2,lagMinus2,dat$value)
+  #calculate the median
+  medianVec=apply(s[,c("lag1","lagMinus1","lag2","lagMinus2","dat$value")],1,median)
+  isSpikeVal<- ((abs(dat$value-medianVec) > spike_value) 
+                &(!is.na(lag1))&(!is.na(lagMinus1))
+                &(!is.na(lag2))&(!is.na(lagMinus2)))
+  if(verbose){
+    print(summary(isSpikeVal))
+  } 
+}
+
+# https://dsp.stackexchange.com/questions/30213/spikes-in-time-series
+# Let your original signal be f[n]
+# Median filter f[n]
+# using N pixels, where N>2×S+1, where S is the maximum number of samples in the spike. The resulting signal, lets call it g[n]
+# should have all the spikes removed.
+# Find the absolute of the difference between the two signals, h[n]=|f[n]−g[n]|
+# This signal represents the spikes.
+
+# Count the number of positive transitions in h[n]
+# that are above a threshold. This is the number of spikes.
+
+test_dat <- read.csv("data/sample_corrupted_data.csv", stringsAsFactors = FALSE)
+
+table(nchar(test_dat$Station))
+
+test_dat$Station <- trimws(test_dat$Station)
+
+test_dat_1 <- test_dat[which(test_dat$Station == "CB"),]
+
+plot(test_dat_1$Temperature_C, type = "l")
+
+length(test_dat_1$Temperature_C)
+window <- 20
+test_dat_1
+
+numeric_spike_med_filter_check <- function(dat, thresh = NULL, 
+                                           window = NULL) {
+  if (is.null(thresh)) 
+  if (is.null(window)) do
   
 }
+
+
