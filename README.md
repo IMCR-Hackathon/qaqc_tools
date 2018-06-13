@@ -1,14 +1,15 @@
-# qaqc_tools
+# qaqc\_tools
+
 A suite of tools to address common yet critical data curating tasks to address the particular needs of the LTER research community, but that  also that apply to QC needs of the broader research community.
 
-# List of functions
+## List of functions
 
-## Date/Time Issues
+### Date/Time Issues
 
-an initial crack at the date_ingest_checker function
+an initial crack at the date\_ingest\_checker function
 
 function dependencies:
-parse_iso_8601(), parse_date() functions from package parsedate
+parse\_iso_8601(), parse\_date() functions from package parsedate
 
 library(parsedate)
 
@@ -22,6 +23,7 @@ arguments:
    optional arguments: precision, TZ (will be detected automatically if present
    in the data)
 
+```R
 function(x, format = c("ISO8601"), precision = NULL, TZ = NULL)) {
   
   # provide user with warnings and messages
@@ -74,11 +76,11 @@ function(x, format = c("ISO8601"), precision = NULL, TZ = NULL)) {
      timedate <- as.POSIXct(strptime(x, format=format,tz=TZ))
 
  }
-  
+``` 
 
-https://www.r-project.org/nosvn/pandoc/parsedate.html
+[](https://www.r-project.org/nosvn/pandoc/parsedate.html)
 
-
+```R
 date_ingest_checker <- function(x, precision, TZ) {
     
     # x: some input string we believe to be a time stamp
@@ -125,7 +127,9 @@ date_ingest_checker <- function(x, precision, TZ) {
   # Team members:
   
 }
+```
 
+```R
 timestamp_output_formatter <- function(x, precision, suppOutput) {
     
     # x: properly formatted ISO 8601 string (in UTC) which we receive as output from date_ingest_checker()
@@ -162,7 +166,9 @@ dateTimeSuppOutput <- format(x, tz = suppOutput, format = formatOutISO)
 Outstanding/unresolved issues for the date-time working group:
     1. What does format of provenance information look like? Harmonize with whatever format the ingest group is coming up with?
 }
+```
 
+```R
 sorted_by_timestamp <- function(x) {
 
   # Description: Check that data are sorted by timestamp
@@ -172,21 +178,25 @@ sorted_by_timestamp <- function(x) {
   # Team members: John
 
 }
+```
 
-#####
 
 
-#####(Other) dataframe formatting issuesKristin
+###(Other) dataframe formatting issues
+
+```R
 spaces_checker <- function(x) {
 
   # Description: Check character data for inadvertant spaces
   
   # Returns:
   
-  # Team members:
+  # Team members: Kristin
 
 }
+```
 
+```R
 complete_cases_checker <- function(x) {
   
   # Description: row by row check that all value columns 
@@ -196,7 +206,9 @@ complete_cases_checker <- function(x) {
   # Team members: Patrick, Amanda
   
 }
+```
 
+```R
 col_type_checker <- function(x) {
   
   # Description:
@@ -206,7 +218,9 @@ col_type_checker <- function(x) {
   # Team members: Patrick, Amanda
 
 }
+```
 
+```R
 fuzzy_duplicate_checker <- function(x) {
 
   # Description: checks for near duplicate rows: 1) rows with the same keys but 
@@ -220,8 +234,11 @@ fuzzy_duplicate_checker <- function(x) {
   # Team members: Patrick, Amanda, Jamie
 
 }
+```
 
-(consistent coding)
+### consistent coding
+
+```R
 encoding_standard_checker <- function(x) {
 
   # Description:
@@ -231,8 +248,9 @@ encoding_standard_checker <- function(x) {
   # Team members:
   
 }
+```
 
-###Flagging & checks###
+Flagging & checks
 NEON example R code for looking at the flags
   outTarn2 <- def.plau(data = data.frame(PARdataUpTarn5$new.data), RngMin = -10, RngMax = 3000, DiffStepMax = 500, NumGap = 4, DiffPersMin = rep.int(0.0001,length(data)),TestNull = T, Vrbs = T)
   str(outTarn2)
@@ -242,6 +260,7 @@ NEON example R code for looking at the flags
   unique(outTarn2$PARdataUpTarn5.new.data$qfNull)
   unique(outTarn2$PARdataUpTarn5.new.data$qfPers)
 
+```R
 gap_checker <- function(x) {
 
   # Description:
@@ -251,7 +270,9 @@ gap_checker <- function(x) {
   # Team members: Celeste, stevan
 
 }
+```
 
+```R
 numberic_step_checker() 
   # Description: Flags time series (e.g., sensor data) for unexpected
   # jumps (increase or decrease) in a single time step. 
@@ -275,7 +296,9 @@ numberic_step_checker()
   # Examples:
   
   # Team members:
+```
 
+```R
 numeric_range_checker <- function(x) {
   
   # Description:
@@ -285,7 +308,9 @@ numeric_range_checker <- function(x) {
   # Team members: Celeste
 
 }
+```
 
+```R
 acceptable_string_checker <- function(x) {
   
   # Description:
@@ -295,7 +320,9 @@ acceptable_string_checker <- function(x) {
   # Team members:
 
 }
+```
 
+```R
 numeric_spike_checker <- function(x) {
 
   # Description:
@@ -305,7 +332,9 @@ numeric_spike_checker <- function(x) {
   # Team members: Patrick, kaelin
 
 }
+```
 
+```R
 numeric_slope_checker <- function(x) {
 
   # Description:
@@ -315,7 +344,10 @@ numeric_slope_checker <- function(x) {
   # Team members: Celeste Patrick
 
 }
+```
 
+
+```R
 check_timeseries_anomalies <- function(x) {
 
   # Description:
@@ -325,7 +357,10 @@ check_timeseries_anomalies <- function(x) {
   # Team members: Patrick
 
 }
+```
 
+
+```R
 check_number_bensford <- function(x) {
 
   # Description: For numeric values that span multiple orders of magnitude, Benfords Law predicts a distribution rich in low values with few high values for the first digit.  The result applies to an entire series of data values, not to any particular data value. 
@@ -335,7 +370,9 @@ check_number_bensford <- function(x) {
   # Team members: John
 
 }
+```
 
+```R
 anomaly_outlier_vis_tool <- function(args) {
  
   # Description: 
@@ -350,4 +387,5 @@ anomaly_outlier_vis_tool <- function(args) {
   
   # Team members: Patrick
    
-    }
+}
+```
