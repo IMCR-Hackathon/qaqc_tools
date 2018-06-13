@@ -3,21 +3,24 @@ A suite of tools to address common yet critical data curating tasks to address t
 
 # List of functions
 
-##Date/Time Issues
+## Date/Time Issues
 
-# an initial crack at the date_ingest_checker function
+an initial crack at the date_ingest_checker function
 
-# function dependencies:
-# parse_iso_8601(), parse_date() functions from package parsedate
+function dependencies:
+parse_iso_8601(), parse_date() functions from package parsedate
 
 library(parsedate)
 
-# arguments:
-#   x: some input string we believe to be a time stamp
-#   format: either "ISO8601", a format string we can pass to strptime, or NULL;
-#   if NULL, we will use parsedate() to try and load (user will be warned)
-#   optional arguments: precision, TZ (will be detected automatically if present
-#   in the data)
+arguments:
+
+   x: some input string we believe to be a time stamp
+
+   format: either "ISO8601", a format string we can pass to strptime, or NULL;
+   if NULL, we will use parsedate() to try and load (user will be warned)
+
+   optional arguments: precision, TZ (will be detected automatically if present
+   in the data)
 
 function(x, format = c("ISO8601"), precision = NULL, TZ = NULL)) {
   
