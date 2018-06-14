@@ -76,18 +76,26 @@ all.equal(attributes(test2)$range_fails,
           rep(-1, length(test2$values))) 
 
 
-
-numeric_slope_checker <- function(dat1, dat2, dat3, ...) {
+numeric_step_checker <- function(x,stepMax=NA,verbose=FALSE) {
+  # if stepMax isn't specified, try to define a step based on 
+  # the variance of the data stream. Default is 1.96*standard deviation
+  # of the sequential differences
+  # NOTE if the default step is used, about 5% of the data will be flagged
+  # even if there are no real problems with the data
+  stepMax<-ifelse(is.na(stepMax),(1.96*sd(diff(x,lag=1),na.rm=TRUE)),stepMax)
   
-  # Description: test sensor drift - requires at least three sensor readings with
-  # concurrent measurements
-  # Inputs:
-  # Returns:
-  # Tests:
-  # Examples:
+  isStep <- abs(diff(x,lag=1)) > stepMax
+  result<-ifelse(isStep,1,0)
+  # make the result vector length the same as x
+  result<-append(-1,result)
+  result<-ifelse(is.na(result),-1,result)
+  if (verbose){
+    print(paste("Looking for jumps or drops in the data > ",stepMax,sep=''))
+    print("Frequency of result codes:")
+    print(summary(as.factor(result)))
+  }
+  return(result)
 }
-
-
 
 numeric_spike_window_checker <- function(dat, 
                                          spike_value = c(3, 5), 
@@ -143,15 +151,6 @@ all.equal(out[[36]],
           c(12,  7,  8, 14, 10))
 all.equal(out[[1]], 
           c(14, 8, 11, 12, 11))
-  
-  if all NA
-  if one_non_NA
-  if >= 2 non_NA (range, na.rm = TRUE
-                  
-}
-
-mav <- function(x,n=5){filter(x,rep(1/n,n), sides=2)} #Average
-
 
 # https://dsp.stackexchange.com/questions/30213/spikes-in-time-series
 # Let your original signal be f[n]
@@ -229,8 +228,16 @@ numeric_spike_checker <- function(x, spike_min = NA, verbose = FALSE) {
   }
   return(result)
 }
-}
 
+# numeric_slope_checker <- function(dat1, dat2, dat3, ...) {
+#   
+#   # Description: test sensor drift - requires at least three sensor readings with
+#   # concurrent measurements
+#   # Inputs:
+#   # Returns:
+#   # Tests:
+#   # Examples:
+# }
 
 
 complete_cases_checker <- function(x) {
