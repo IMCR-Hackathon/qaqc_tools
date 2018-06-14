@@ -5,10 +5,9 @@
 # detecting/manipulating time zones given different kinds of supplied timestamps
 
 # Dependencies: parse_iso_8601(), format_iso_8601() functions from package
-# parsedate; some functions such as %nin% in package Hmisc
+# parsedate
 
 # library(parsedate)
-# library(Hmisc)
 
 ### handleTimestamp
 
@@ -144,7 +143,7 @@ date_ingest_checker <- function(x, format = c("ISO8601"), precision = NULL,
     # move this check down so that is verifies the TZ as well as the
     # timeZone; check that the parsed timezone is in the Olson list
 
-    if (timeZone %nin% OlsonNames()) {
+    if (!(timeZone %in% OlsonNames())) {
 
       stop("Parsed timezone is not valid according to OlsonNames()")
 
