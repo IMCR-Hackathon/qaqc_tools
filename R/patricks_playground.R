@@ -24,8 +24,9 @@ ranges <- unlist( lapply( lapply(out, range, na.rm = TRUE), diff ) )
 mean(ranges)
 median(ranges)
 
-
-
+unlist( lapply(out, sd, na.rm = TRUE))
+unlist( lapply(out, mad, na.rm = TRUE))
+unlist( lapply(out, median, na.rm = TRUE))
 
 sorted_by_timestamp <- function(timeVector, allowTies = TRUE){
   if(mode(timeVector) != "numeric"){
