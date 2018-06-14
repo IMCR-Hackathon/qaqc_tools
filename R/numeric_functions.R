@@ -118,10 +118,46 @@ numeric_spike_window_checker <- function(dat,
   } 
 }
 
+
+test_dat <- read.csv("data/sample_corrupted_data.csv", stringsAsFactors = FALSE)
+table(nchar(test_dat$Station))
+test_dat$Station <- trimws(test_dat$Station)
+test_dat_1 <- test_dat[which(test_dat$Station == "CB"),]
+plot(test_dat_1$Temperature_C, type = "l")
+
+length(test_dat_1$Temperature_C)
+S <- 20
+test_dat_1
+# https://stackoverflow.com/questions/43345486/median-filter-in-r 
+if (type == "median_filter" | is.null(type)) {
+  smoothed <- runmed(test_dat_1$Temperature_C, k = 5)
+  resids <- test_dat_1$Temperature_C - smoothed
+}
+
+moving_range <- function(dat, window = 5) {
+  
+  total <- length(dat)
+  spots <- seq(from=1, to=(total-window), by=step)
+  result <- vector(length = length(spots))
+  for(i in 1:length(spots)){
+    result[i] <- mean(data[spots[i]:(spots[i]+window)])
+  }
+  return(result)
+  
+  if all NA
+  if one_non_NA
+  if >= 2 non_NA (range, na.rm = TRUE
+                  
+}
+
+mav <- function(x,n=5){filter(x,rep(1/n,n), sides=2)} #Average
+mmed <- function(x,n=5){runmed(x,n)} #Median
+
 # https://dsp.stackexchange.com/questions/30213/spikes-in-time-series
 # Let your original signal be f[n]
 # Median filter f[n]
-# using N pixels, where N>2×S+1, where S is the maximum number of samples in the spike. The resulting signal, lets call it g[n]
+# using N pixels, where N>2×S+1, where S is the maximum number of samples in the spike. 
+# The resulting signal, lets call it g[n]
 # should have all the spikes removed.
 # Find the absolute of the difference between the two signals, h[n]=|f[n]−g[n]|
 # This signal represents the spikes.
@@ -129,25 +165,19 @@ numeric_spike_window_checker <- function(dat,
 # Count the number of positive transitions in h[n]
 # that are above a threshold. This is the number of spikes.
 
-test_dat <- read.csv("data/sample_corrupted_data.csv", stringsAsFactors = FALSE)
 
-table(nchar(test_dat$Station))
-
-test_dat$Station <- trimws(test_dat$Station)
-
-test_dat_1 <- test_dat[which(test_dat$Station == "CB"),]
-
-plot(test_dat_1$Temperature_C, type = "l")
-
-length(test_dat_1$Temperature_C)
-window <- 20
-test_dat_1
 
 numeric_spike_med_filter_check <- function(dat, thresh = NULL, 
-                                           window = NULL) {
+                                           window = NULL, ...) {
   if (is.null(thresh)) 
   if (is.null(window)) do
-  
+  # NEON code def.dspk.window.R
+  # # Store na positions as "unable to evaluate" spikes
+  # posSpk[[idxVar]]$posQfSpk$na <- which(is.na(trns))
+  # 
+  # if(Trt$NaTrt == "approx") {
+  #   trns <- approx(x=index(trns), y=trns, xout=index(trns))$y
+  }
 }
 
 
