@@ -1,0 +1,35 @@
+x,format,precision,TZ,outType,notes
+2018/01/02,%Y/%m/%d,day,UTC,POSIXct,happy path
+2018-05-02 1:30 PM,%Y-%m-%d %I:%M:%OS %p,second,UTC,POSIXct,happy path
+2018-06-22 13:30,%Y-%m-%d %H:%M,minute,UTC,POSIXct,happy path
+2018-06-22 13:30:25,%Y-%m-%d %H:%M:%OS,second,UTC,POSIXct,happy path
+2018-06-22 13:30:25.123,%Y-%m-%d %H:%M:%OS3,millisecond,UTC,POSIXct,happy path
+2018/01/02,%Y/%m/%d,day,UTC,stringUTC,happy path
+2018-05-02 1:30 PM,%Y-%m-%d %I:%M:%OS %p,second,UTC,stringUTC,happy path
+2018-06-22 13:30,%Y-%m-%d %H:%M,minute,UTC,stringUTC,happy path
+2018-06-22 13:30:25,%Y-%m-%d %H:%M:%OS,second,UTC,stringUTC,happy path
+2018-06-22 13:30:25.123,%Y-%m-%d %H:%M:%OS3,millisecond,UTC,stringUTC,happy path
+2018/01/02,%Y/%m/%d,day,UTC,POSIXlt,happy path
+2018-05-02 1:30 PM,%Y-%m-%d %I:%M:%OS %p,second,UTC,POSIXlt,happy path
+2018-06-22 13:30,%Y-%m-%d %H:%M,minute,UTC,POSIXlt,happy path
+2018-06-22 13:30:25,%Y-%m-%d %H:%M:%OS,second,UTC,POSIXlt,happy path
+2018-06-22 13:30:25.123,%Y-%m-%d %H:%M:%OS3,millisecond,UTC,POSIXlt,happy path
+2018/01/02,%Y/%m/%d,day,,stringUTC,no TZ but shouldn't need it since no time
+2018/01/02,%Y/%m/%d,,UTC,POSIXct,missing precision
+2018-05-02 1:30 PM,%Y-%m-%d %I:%M:%OS %p,,UTC,POSIXct,missing precision
+2018-06-22 13:30,%Y-%m-%d %H:%M,,UTC,POSIXct,missing precision
+2018-06-22 13:30:25,%Y-%m-%d %H:%M:%OS,,UTC,POSIXct,missing precision
+2018-06-22 13:30:25.123,%Y-%m-%d %H:%M:%OS3,,UTC,POSIXct,missing precision
+2018-05-02 1:30 PM,%Y-%m-%d %I:%M:%OS %p,minute,cats,POSIXct,invalid TZ specified
+08/08/08 12:30,,minute,UTC,POSIXct,no format and not in the tryFormats list
+2018-05-02 1:30 PM,,second,UTC,POSIXct,no format but it is in the tryFormats list
+2018-05-02 1:30 PM,%Y-%m-%d %H:%M,second,UTC,POSIXct,format doesn't match the input dateTime
+2018-05-02 1:30 PM,%Y-%m-%d %I:%M:%OS %p,second,UTC,,missing outputType should default and output POSIXct
+2018-05-02 1:30 PM,%Y-%m-%d %I:%M:%OS %p,second,,POSIXct,missing TZ and timezone not in data
+2018-05-02 1:30 PM,%Y-%m-%d %I:%M:%OS %p,second,MST,POSIXct,MST timezone
+2018-06-22 13:30,%Y-%m-%d %H:%M,minute,MDT,POSIXlt,MDT timezone
+2018-06-22 13:30:25 US/Eastern,%Y-%m-%d %H:%M:%OS %Z,second,UTC,POSIXct,timezone in data and TZ don't match
+2018-06-22 13:30:25 US/Eastern,%Y-%m-%d %H:%M:%OS %Z,second,US/Eastern,POSIXct,timezone in data and matches TZ
+2018-06-22 13:30:25 GMT+2,%Y-%m-%d %H:%M:%OS %Z,second,UTC,POSIXct,timezone in data and TZ don't match
+2018-06-22 13:30:25 GMT+2,%Y-%m-%d %H:%M:%OS %Z,second,GMT+2,POSIXct,timezone in data and matches TZ
+June 11th,,minute,UTC,POSIXct,no format and not in the tryFormats list

@@ -76,6 +76,7 @@ all.equal(attributes(test2)$range_fails,
           rep(-1, length(test2$values))) 
 
 
+
 numeric_step_checker <- function(x,stepMax=NA,verbose=FALSE) {
   # if stepMax isn't specified, try to define a step based on 
   # the variance of the data stream. Default is 1.96*standard deviation
@@ -95,6 +96,16 @@ numeric_step_checker <- function(x,stepMax=NA,verbose=FALSE) {
     print(summary(as.factor(result)))
   }
   return(result)
+}
+
+numeric_slope_checker <- function(dat1, dat2, dat3, ...) {
+  
+  # Description: test sensor drift - requires at least three sensor readings with
+  # concurrent measurements
+  # Inputs:
+  # Returns:
+  # Tests:
+  # Examples:
 }
 
 numeric_spike_window_checker <- function(dat, 
@@ -193,6 +204,47 @@ numeric_spike_med_filter_check <- function(dat, thresh = NULL,
 
 }
 
+# https://dsp.stackexchange.com/questions/30213/spikes-in-time-series
+# Let your original signal be f[n]
+# Median filter f[n]
+# using N pixels, where N>2×S+1, where S is the maximum number of samples in the spike. 
+# The resulting signal, lets call it g[n]
+# should have all the spikes removed.
+# Find the absolute of the difference between the two signals, h[n]=|f[n]−g[n]|
+# This signal represents the spikes.
+
+# Count the number of positive transitions in h[n]
+# that are above a threshold. This is the number of spikes.
+
+
+dat <- t
+numeric_spike_med_filter_check <- function(dat, thresh = NULL, 
+                                           win_size = NULL, ...) {
+  # Needs NA handling and more tests
+  # better default win_size based on length of data and NA freq
+  # NEON code def.dspk.window.R
+  # # Store na positions as "unable to evaluate" spikes
+  # posSpk[[idxVar]]$posQfSpk$na <- which(is.na(trns))
+  # 
+  # if(Trt$NaTrt == "approx") {
+  #   trns <- approx(x=index(trns), y=trns, xout=index(trns))$y
+  # }
+  if (is.null(thresh)) {
+    out <- moving_windows(dat = dat, win_size = win_size)
+    thresh <- 2 * median(unlist( lapply(out, sd, na.rm = TRUE)))
+    # unlist( lapply(out, mad, na.rm = TRUE))
+    # unlist( lapply(out, median, na.rm = TRUE))
+  }
+  if (is.null(win_size)) win_size <- 5
+
+  med_smoothed <- runmed(x = dat, k = win_size)
+  resids <- abs(dat - med_smoothed)
+  fails <- which(resids > thresh)
+  attr(dat, "spike_med_filter_fails") <- fails
+  return(dat)
+
+}
+
 numeric_spike_checker <- function(x, spike_min = NA, verbose = FALSE) {
   # Description: Tests for spikes in data
   # Inputs: vector to be tested, optional threshold for how large a spike 
@@ -237,7 +289,8 @@ numeric_spike_checker <- function(x, spike_min = NA, verbose = FALSE) {
 #   # Returns:
 #   # Tests:
 #   # Examples:
-# }
+
+}
 
 
 complete_cases_checker <- function(x) {
