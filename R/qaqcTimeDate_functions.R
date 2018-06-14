@@ -42,6 +42,13 @@ handleTimestamp <- function (x, format = c("ISO8601"), precision = NULL,
     
   }
   
+  initISODateTime <- date_ingest_checker(x, format, precision, TZ)
+  
+  precISODateTime <- timestamp_output_formatter(initISODateTime,
+                                                precision, suppOutput)
+  
+  return(precISODateTime)
+  
 }
 
 ### ISOStringPrecformatter
