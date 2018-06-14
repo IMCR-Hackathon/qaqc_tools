@@ -185,7 +185,7 @@ date_ingest_checker <- function(x, Format = NULL, precision = NULL,
   # a number instead of a date (and time)
 
   if (!is.na(suppressWarnings(as.numeric(x))) ||
-      (is.na(suppressWarnings(as.numeric(x))) &&
+      (is.na(suppressWarnings(as.numeric(x))) && !is.null(Format) &&
        (Format == "%Y%m%d" || Format == "%y%m%d"))) {
 
     stop("The input date is numeric, please re-format as date and time ",
