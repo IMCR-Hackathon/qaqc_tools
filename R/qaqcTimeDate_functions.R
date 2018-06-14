@@ -214,7 +214,7 @@ date_ingest_checker <- function(x, Format = NULL, precision = NULL,
   }
 
   # for the moment the function won't accept arbitrary whitespace on input
-  if (grepl("%e|%t", Format)) {
+  if (!is.null(Format) && grepl("%e|%t", Format)) {
     stop("This function does not currently accept formats containing ",
          "arbitrary whitespace on input, %n and %t\n")
   }
@@ -224,7 +224,7 @@ date_ingest_checker <- function(x, Format = NULL, precision = NULL,
 
   # perform a series of additional formatting checks if there is a string format
   # timezone appended to the input dateTime data
-  if (grepl("%Z$", Format)) {
+  if (!is.null(Format) && grepl("%Z$", Format)) {
 
     cat("Format indicates that a timezone is part of the input dateTime data.",
         " Attempting to detect time zone from supplied data...\n")
