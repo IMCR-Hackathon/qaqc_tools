@@ -14,14 +14,14 @@
 
 # Wrapper function for date_ingest_checker() and timestamp_output_formatter()
 
-handleTimestamp <- function (x, format = c("ISO8601"), precision = NULL,
+handleTimestamp <- function (x, format = NULL, precision = NULL,
                              TZ = NULL, suppOutput = NULL) {
 
   #   x: some input string we believe to be a time stamp; passed to
   #      date_ingest_checker()
-  #   format: either "ISO8601", a format string we can pass to strptime, or
-  #      NULL; if NULL, we will use the tryformats functionality in
-  #      as.POSIXct; passed to date_ingest_checker()
+  #   format: a format string we can pass to strptime, or NULL; if NULL, we will
+  #      use the tryformats functionality in as.POSIXct; passed to
+  #      date_ingest_checker()
   #   precision: optional argument passed to date_ingest_checker() and then
   #      timestamp_output_formatter()
   #   TZ: optional argument passed to date_ingest_checker(); otherwise time zone
@@ -64,7 +64,7 @@ ISOStringPrecformatter <- function(precision = NULL,
 
   if (!methods::hasArg(desiredZone) || (is.null(desiredZone))) {
 
-    stop("Must specify a desiredZone to generate the right format string.")
+    stop("Must specify a desiredZone to generate the right format string.\n")
 
   } else {
 
@@ -131,233 +131,239 @@ ISOStringPrecformatter <- function(precision = NULL,
 # have it
 
 addISO8601colon <- function(ISOstring) {
-
+  
   # detect whether the string has a colon in it already
-
+  
   if (grepl('^(.*)[\\+\\-](.{2})\\:(.{2})$', ISOstring)) {
-
+    
     # appears to be an ISO string with a colon already; just return output
-
+    
     cat("Your string appears to have a colon in it already; returning it",
         "unaltered.\n")
-
+    
     ISOstringout <- ISOstring
-
+    
   } else if (grepl('^(.*)[\\+\\-](.{4})$', ISOstring)) {
-
+    
     # appears to be an ISO 8601 string having a four digit offset without a
     # colon
-
+    
     ISOstringout <- gsub('^(.*)(.{2})$', '\\1:\\2', ISOstring)
-
+    
   } else {
-
+    
     stop("Input doesn't appear to be a properly formatted ISO 8601 timestamp ",
          "with a numeric time offset component.\n")
-
+    
   }
-
+  
   return(ISOstringout)
-
+  
 }
 
 ### date_ingest_checker: Workhorse function for initial ingestion and formatting
-#x is the string dateTime data [string]
-#format is the format of the input data, ses strptime documentation for proper notation [string]
-#precision can have values of "day", "minute", "second", or "milliSecond" for the input and output [string]
-#TZ is the timezone that the dateTime data was collected with some additions to the OlsonNames() list are acceptable [string]
-#outType can have values of "POSIXct","POSIXlt", or "stringISO" [string]
-date_ingest_checker <- function(
-  x, 
-  format = c("ISO8601"), 
-  precision = NULL,
-  TZ = NULL,
-  outType = "POSIXct") {
 
-  #   x: some input string we believe to be a time stamp
-  #   format: either "ISO8601", a format string we can pass to strptime, or
-  #      NULL; if NULL, we will use the tryformats functionality in
-  #      as.POSIXct
-  #   optional arguments: precision, TZ (can be detected automatically from
-  #      the data)
-
-  ## *** Would someone ever enter YYYYMMDD (%Y%m%d would be ok) or YYMMDD
-  ## (%y%m%d) with no "-" or "/", but it wouldn't be an excel format ***
-
+date_ingest_checker <- function(x, format = NULL, precision = NULL,
+                                TZ = NULL, outType = "POSIXct") {
+  
+  #   x: some input string that contains the dateTime data [string]
+  #   format: a format string we can pass to strptime, or NULL; if NULL, we will
+  #      use the tryformats functionality in as.POSIXct; passed to
+  #      date_ingest_checker()
+  #   precision: optional argument that can have values of "day", "minute",
+  #      "second", or "milliSecond" for the input and output; if not specified
+  #      [string]
+  #   TZ: optional argument specifying the timezone in which the dateTime data
+  #      was collected; must be in the OlsonNames() list [string]; if not
+  #      specified, uses whatever is given in the format string for %z or %Z
+  #   outType: form of the data to be returned by the function; can have values
+  #      of "POSIXct","POSIXlt", or "stringISO"; defaults to POSIXct [string]
+  
   ### Initial checks on formatting of the input string and the timezone
-
+  
   # remembered that sometimes when reading in Excel files the date format is an
   # integer; so, perform some sort of integer check to see if it is coming in as
   # a number instead of a date (and time)
-
+  
   if (!is.na(suppressWarnings(as.numeric(x))) ||
       (is.na(suppressWarnings(as.numeric(x))) && 
        (format == "%Y%m%d" || format == "%y%m%d"))) {
+    
     stop("The input date is numeric, please re-format as date and time ",
          "before trying again. Valid numeric formats are '%Y%m%d' or ",
-         "'%y%m%d'")
-
+         "'%y%m%d'\n")
+    
   }
-
+  
   # check for timezone appended to dateTime data
   alreadyInUTC <- grepl("Z$", x) # yields true or false
-  if(alreadyInUTC){
-    if(!is.null(TZ)&&(!grepl("GMT$|UTC$",TZ))&&(grepl("GMT[+-][0]*[:]*[0-9][1-9]",TZ))){
-      stop("Format indicates UTC timezone, but input TZ not UTC or GMT.")
-    }else{
-      TZ = "UTC"
+  
+  if (alreadyInUTC) {
+    
+    if (!is.null(TZ) && (!grepl("GMT$|UTC$",TZ)) && 
+        (grepl("GMT[+-][0]*[:]*[0-9][1-9]",TZ))) {
+      
+      stop("Format string indicates UTC timezone, but value supplied for ",
+           "function argument 'TZ' is not UTC or GMT.\n")
+      
+    } else {
+      
+      TZ <- "UTC"
+      
     }
+    
   }
   
   # for the moment the function won't accept arbitrary whitespace on input
   if (grepl("%e|%t", format)) {
     stop("This function does not currently accept formats containing ",
-         "arbitrary whitespace on input, %n and %t")
+         "arbitrary whitespace on input, %n and %t\n")
   }
-
+  
   # ensure input x is a character vector
   x <- as.character(x)
-
-  # # if the timezone is appended as a character at the end of the format
-  # # (%Z), parse it out and reformat the data and format
-  # numSpacesFmt <- unlist(gregexpr(" ", format))
-  # numSpacesX <- unlist(gregexpr(" ", x))
-
-  # perform a series of additional formatting checks
-  # If there is a string format timezone appended to the input dateTime data
+  
+  # perform a series of additional formatting checks if there is a string format
+  # timezone appended to the input dateTime data
   if (grepl("%Z$", format)) {
+    
     cat("Format indicates that a timezone is part of the input dateTime data.",
         " Attempting to detect time zone from supplied data...\n")
+    
     # parse timezone from the end of the data and format
     locZ <- unlist(gregexpr("%Z", format))
     beforeZ <- substr(format, (locZ - 1), (locZ - 1))
-    # first, a check since some of the formats can contain whitespace, e.g.,
-    # %e: Day of the month as decimal number (1-31), with a leading space
-    # for a single-digit number
-    # %n: Newline on output, arbitrary whitespace on input
-    # %t: Tab on output, arbitrary whitespace on input
+    
+    # first, a check since some of the formats can contain whitespace
     if (beforeZ != " ") {
+      
       stop("This function currently doesn't handle string time zones that ",
            "are not preceded by a space. Submit  a request for a feature ",
-           "update or reformat your data.")
+           "update or reformat your data.\n")
+      
     }
-
+    
     afterZ <- substr(format, (locZ + 2), (locZ + 2))
-
+    
     if (afterZ == "") {
+      
       afterZ <- "$"
+      
     }
-
+    
     regexTZ <- paste0(beforeZ, "[A-Za-z0-9+-\\/]*", afterZ)
     locTimeZone <- gregexpr(regexTz, x)
-
+    
     if (length(locTimeZone)) {
+      
       stop("Unique timezone could not be parsed from the input data and ",
-           "format.")
+           "format.\n")
+      
     }
-
+    
     timeZone <-
       substr(x, unlist(locTimeZone), (unlist(locTimeZone) +
                                         attr(locTimeZone[[1]],
                                              "match.length")))
-
+    
     # clean leading and trailing whitespace from the parsed timeZone
     timeZone <- trimws(timeZone)
-
+    
     # check that the parsed timezone from the data matches the input TZ
     # argument if there is one
     if (!is.null(TZ) && TZ != timeZone) {
+      
       stop("Parsed timezone and input argument TZ do not match. Correct ",
-           "input or data to match before trying again.")
+           "input or data to match before trying again.\n")
+      
     }
-
+    
     # set the TZ to timeZone if there wasn't one specified in the input
     TZ = timeZone
-
-  }else if(is.null(TZ)){
+    
+  } else if (is.null(TZ)) {
+    
     stop("Error, no timezone input and no timezone could be parsed from data.")
-  }else{
-    if(grepl("[A-Za-z]",x)&&!grepl("T",x)){
-      stop("Format does not include a string other than ISO 'T' in date format found. Cannot proceed with date string containing alphabetic characters that aren't part of a timezone.")
+    
+  } else {
+    
+    if (grepl("[A-Za-z]",x)&&!grepl("T",x)) {
+      
+      stop("Format does not include a string other than ISO 'T' in date ",
+           "format found. Cannot proceed with date string containing ",
+           "alphabetic characters that aren't part of a timezone.\n")
+      
     }
+    
   }
-
-  ### Extract & read components of the timestamp
-
-  #Ok, really just need to look for three parts to the dateTime
-  #1, date part can contain "-" or "/", must be present
-  #2, time part contains ":", starts with "T" or " ", may or may not be there
-  #3, timezone may or may not be there, starts with a "+" "-" or " " - at this point in the code we know what the timezone is
   
-  #Clean up timezones that are GMT+##:## or GMT+##, etc.
-  #Remove all 0 and ":"
+  ### Extract & read components of the timestamp
+  
+  # clean up timezones that are GMT+##:## or GMT+##, etc.
+  # remove all 0 and ":"
   TZ <- gsub("0|:","",TZ)
-  #Remove a remaining + or - if the offset was all zeros
+  # remove a remaining + or - if the offset was all zeros
   TZ <- gsub("\\+$|\\-$","",TZ)
   
-  #If the Timezone is one of the GMT ones that has a non-zero offset add Etc/ before the GMT part
-  if(grepl("GMT\\+[0-9]|GMT\\-[0-9]",TZ)){
-    TZ <- paste0("Etc/",TZ)
-  }
-
+  # if the Timezone is one of the GMT ones that has a non-zero offset add 
+  # Etc/ before the GMT part
   
-  #If the Timezone is "MDT", "CDT", "EDT", or "PDT"
+  if (grepl("GMT\\+[0-9]|GMT\\-[0-9]",TZ)) {
+    
+    TZ <- paste0("Etc/",TZ)
+    
+  }
+  
+  # if the Timezone is "MDT", "CDT", "EDT", or "PDT"
+  
   switch(TZ,
          "EDT"={TZ = "EST5EDT"},
          "CDT"={TZ = "CST6CDT"},
          "MDT"={TZ = "MST7MDT"},
          "PDT"={TZ = "PST8PDT"})
-  if(grepl("EDT|CDT|MDT|PDT",TZ)){
-    warning(paste0("The timezone you entered is daylight savings time and was converted to ",
-                   TZ,
-                   ". Consider whether the US/locale that accounts for standard and daylight",
-                   "time would be more appropriate."))
+  
+  if (grepl("EDT|CDT|MDT|PDT",TZ)) {
+    
+    warning(paste0("The timezone you entered is daylight savings time and was ",
+                   "converted to TZ. Consider whether the US/locale that ",
+                   "accounts for standard and daylight time would be more ",
+                   "appropriate.\n"))
+    
   }
   
-  #Move this check down so that is verifies the TZ as well as the timeZone
-  #Check that the parsed timezone is in the Olson list
-  if(!(TZ%in%OlsonNames())){
-    stop("Parsed timezone is not valid according to OlsonNames()")}
+  # check that the parsed timezone is in the Olson list
   
-  # firstColon <- min(unlist(gregexpr(":", x)))
-  # firstSpaceOrT <- min(unlist(gregexpr("[0-9]T[0-9]| ", x)))
-  # 
-  # if (firstColon < firstSpaceOrT) {
-  #   # the time is before the date
-  #   timePart <- substr(x, 1, (firstSpaceOrT - 1))
-  # }
-  # 
-  # # add T in nearly ISO format, test format to know where spaces are
-  # numSpaces <- unlist(gregexpr(" ", format))
-  # 
-  # if (length(numSpaces) > 0) {
-  #   # the first space should always be between the date and time
-  #   firstSpaceIdx <- numSpaces[1]
-  #   substr(x, fistSpaceIdx, firstSpaceIdx) <- "T"
-  #   substr(format, fistSpaceIdx, firstSpaceIdx) <- "T"
-  #   ## *** add something here for provenance where we record that the T was
-  #   ## added to the date string and input format ***
-  # }
-
+  if (!(TZ%in%OlsonNames())) {
+    
+    stop("Parsed timezone is not valid according to the R OlsonNames() list.")
+    
+  }
+  
   ### Provide user with some additional warnings and messages
-    # check for precision input
-
-    if (is.null(precision)) {
-      cat("User did not specify a timestamp precision. Timestamp ",
-          "precision will be detected from supplied data...\n")
-    }
-
+  
+  # check for precision input
+  
+  if (is.null(precision)) {
+    
+    cat("User did not specify a timestamp precision. Timestamp ",
+        "precision will be detected from supplied data...\n")
+    
+  }
+  
   ### Now, do the actual reading in of the timestamp
-
-  # Three cases: User did not supply a format at all; user indicated
-  # that the timestamp was ISO 8601; or, user supplied a formatting string
-
+  
+  # Two cases: User did not supply a format at all; or, user supplied a
+  # formatting string
+  
   if (is.null(format)) {
+    
     # Case 1: User did not supply any formatting information; attempt to
     # read in using tryFormats argument to as.POSIXct()
+    
     warning("User did not specify a date-time format. Attempting to",
             "detect format from supplied data using tryFormats in the function ",
             "as.POSIXct...\n")
+    
     timedate <- as.POSIXct(x, tz = TZ,
                            tryFormats = c(
                              "%F %T",
@@ -375,28 +381,26 @@ date_ingest_checker <- function(
                              "%Y/%m/%d"
                            )
     )
+    
   } else {
-    # Case 3: User has provided a format we can pass to as.POSIXct
+    
+    # Case 2: User has provided a format we can pass to as.POSIXct
     timedate <- as.POSIXct(x,tz = TZ, format = format)
+    
   }
   
-  # else if (format == "ISO8601") {
-  #   # Case 2: User indicated timestamp was ISO 8601; will use parse_iso_8601()
-  #   # from parsedate as a check (e.g. in case T was missing)
-  #   # then reformat to ISO format
-  #   timedate <- parsedate::parse_iso_8601(x) # returns date in UTC
-  # } 
-
   ### Generate, return function output
   # final output as an ISO character string
+  
   switch(outType,
-    stringISO = {timedate <- format(as.POSIXlt(timedate, tz = "UTC"),
-                                    format = ISOStringPrecformatter(precision = precision,
-                                                                    desiredZone = c("UTC")))},
-    POSIXlt = {timedate <- as.POSIXlt(timedate)}
-    
+         stringISO = {timedate <- format(as.POSIXlt(timedate, tz = "UTC"),
+                                         format = ISOStringPrecformatter(precision = precision,
+                                                                         desiredZone = c("UTC")))},
+         POSIXlt = {timedate <- as.POSIXlt(timedate)}
   )
+  
   return(timedate)
+  
 }
 
 ### timestamp_output_formatter
