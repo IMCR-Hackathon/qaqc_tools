@@ -10,6 +10,40 @@
 # library(parsedate)
 # library(Hmisc)
 
+### handleTimestamp
+
+# Wrapper function for date_ingest_checker() and timestamp_output_formatter()
+
+handleTimestamp <- function (x, format = c("ISO8601"), precision = NULL,
+                             TZ = NULL, suppOutput = NULL) {
+  
+  #   x: some input string we believe to be a time stamp; passed to
+  #      date_ingest_checker()
+  #   format: either "ISO8601", a format string we can pass to strptime, or
+  #      NULL; if NULL, we will use the tryformats functionality in
+  #      as.POSIXct; passed to date_ingest_checker()
+  #   precision: optional argument passed to date_ingest_checker() and then
+  #      timestamp_output_formatter()
+  #   TZ: optional argument passed to date_ingest_checker(); otherwise time zone
+  #      will be assessed from the data itself; if a value is supplied for TZ,
+  #      this will be checked against any time zone information present in the
+  #      data to harmonize
+  #   suppOutput ("supplemental output"): optional argument passed to 
+  #      request timestamp output in "local" or other time zone/locality in
+  #      addition to UTC; must be something in the Olson list
+  
+  # quick argument check for the precision argument
+  
+  if (!is.null(precision)) {
+    
+    precision <- match.arg(precision,
+                           c("day", "minute", "second", "milliSecond"),
+                           several.ok = FALSE)
+    
+  }
+  
+}
+
 ### date_ingest_checker: Workhorse function for initial ingestion and formatting
 
 date_ingest_checker <- function(x, format = c("ISO8601"), precision = NULL,
