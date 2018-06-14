@@ -443,18 +443,20 @@ timestamp_output_formatter <- function(x, precision = NULL,
 
   # generate the UTC timestamp; store in list object
   
-  attributes(x)$tzone <- "UTC" # convert time to UTC
-  dateTimeUTC <- format(x, format = ISOStringPrecformatter(precision = precision,
-                                                        desiredZone = c("UTC")))
+  dateTimeUTC <- format(testtime,
+                        format = ISOStringPrecformatter(precision = precision,
+                                                        desiredZone = c("UTC")),
+                        tz = "UTC")
 
   outList <- list("dateTimeUTC" = dateTimeUTC) # create our output list object
 
   # generate the supplementary output, if requested
   if (!is.null(suppOutput)) {
     
-    attributes(x)$tzone <- suppOutput # convert time to whatever TZ user wants
-    dateTimeSuppOutput <- format(x, format = ISOStringPrecformatter(precision = precision,
-                                                          desiredZone = c("other")))
+    dateTimeSuppOutput <- format(x,
+                                 format = ISOStringPrecformatter(precision = precision,
+                                                          desiredZone = c("other")),
+                                 tz = suppOutput)
 
     # need to insert the colon in the right place in the optional-timezone output
     # string to make it ISO 8601 compliant
