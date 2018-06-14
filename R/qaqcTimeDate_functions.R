@@ -182,7 +182,7 @@ date_ingest_checker <- function(x, format = c("ISO8601"), precision = NULL,
     TZ <- gsub(, "")
 
   }
-  
+
     # check for precision input
 
     if (is.null(precision)) {
@@ -227,11 +227,10 @@ date_ingest_checker <- function(x, format = c("ISO8601"), precision = NULL,
   } else if (format == "ISO8601") {
 
     # Case 2: User indicated timestamp was ISO 8601; will use parse_iso_8601()
-    # from parsedate
+    # from parsedate as a check (e.g. in case T was missing)
+    # then reformat to ISO format
 
     timedate <- parsedate::parse_iso_8601(x) # returns date in UTC
-
-    ## *** probably redundant with format_iso_8601 ***
 
   } else {
 
