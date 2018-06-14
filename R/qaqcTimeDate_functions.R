@@ -31,7 +31,7 @@ handleTimestamp <- function (x, format = c("ISO8601"), precision = NULL,
   #      request timestamp output in "local" or other time zone/locality in
   #      addition to UTC; must be something in the Olson list
   
-  # quick argument check for the precision argument
+  # first, quick argument check for the precision argument
   
   if (!is.null(precision)) {
     
@@ -40,6 +40,116 @@ handleTimestamp <- function (x, format = c("ISO8601"), precision = NULL,
                            several.ok = FALSE)
     
   }
+  
+}
+
+### ISOStringPrecformatter
+
+# Creates complete ISO 8601 format string based on degree of time precision and
+# desired time zone (choices are either UTC or another, non-UTC time); if no
+# precision is supplied, generates format string with seconds as default
+
+ISOStringPrecformatter <- function(precision = NULL,
+                                   desiredZone = c("UTC","other")) {
+  
+  # check for desiredZone argument
+  
+  if (is.null(desiredZone)) {
+    
+    stop("Must specify a desiredZone to generate the right format string.")
+    
+  } else {
+    
+    desiredZone <- match.arg(desiredZone,
+                             c("UTC", "other"))
+    
+  }
+  
+  # create base format string
+  
+  if (is.null(precision)) {
+    
+    formatOutISO_base <- "%Y-%m-%dT%H:%M:%S"
+
+    } else {
+    
+    precision <- match.arg(precision,
+                           c("day", "minute", "second", "milliSecond"),
+                           several.ok = FALSE)
+    
+    switch(precision,
+           day = {formatOutISO_base <- "%Y-%m-%d"},
+           minute = {formatOutISO_base <- "%Y-%m-%dT%H:%M"},
+           second = {formatOutISO_base <- "%Y-%m-%dT%H:%M:%S"},
+           milliSecond = {formatOutISO_base <- "%Y-%m-%dT%H:%M:%OS"}
+    )
+    
+    }
+  
+  # generate secondary time offset format string that will be appended to
+  # the main format string generated above; ISO 8601 does not require the offset
+  # designator if only Y-m-d is given
+  
+  # have to use as.POSIXlt rather than as.POSIXct for this task so that time zone
+  # conversion works properly
+  
+  if (formatOutISO_base == "%Y-%m-%d") {
+    
+    formatOutISO_complete <- "%Y-%m-%d"
+
+  } else {
+    
+    if (desiredZone == "UTC") {
+    
+      formatOutISO_complete <- paste0(formatOutISO_base, "+00:00")
+      
+    } else if (desiredZone == "other") {
+      
+      formatOutISO_complete <- paste0(formatOutISO_base, "%z")
+    
+    }
+    
+  }
+  
+  # return the format string
+  
+  return(formatOutISO_complete)
+    
+}
+
+### addISO8601colon
+
+# Adds a colon to the time offset component of an ISO8601 string that doesn't
+# have it
+
+addISO8601colon <- function(ISOstring) {
+  
+  # detect whether the string has a colon in it already
+  
+  if (grepl('^(.*)\\+(.{2})\\:(.{2})$', ISOstring)) {
+    
+    # appears to be an ISO string with a colon already; just return output
+    
+    cat("Your string appears to have a colon in it already; returning it ",
+        "unaltered.\n")
+    
+    ISOstringout <- ISOstring
+    
+  } else if (grepl('^(.*)\\+(.{4})$', ISOstring)) {
+    
+    # appears to be an ISO 8601 string having a four digit offset without a
+    # colon 
+    
+    ISOstringout <- gsub('^(.*)(.{2})$', '\\1:\\2', ISOstring)
+    
+  } else {
+    
+    stop("Input doesn't appear to be a properly formatted ISO 8601 timestamp.",
+         "\n")
+    
+  }
+  
+  return(ISOstringout)
   
 }
 
@@ -277,11 +387,9 @@ date_ingest_checker <- function(x, format = c("ISO8601"), precision = NULL,
 
   # final output as an ISO character string
 
-  timedateISO <- parsedate::format_iso_8601(timedate) # note this returns +00:00
-                                                      # not Z
-
-  ## *** if converting back to character for millisecond will need to specify #
-  ## of decimal places for MS e.g. format(y, "%Y-%m-%d %H:%M:%OS6") ***
+  timedateISO <- format(as.POSIXlt(timedate, tz = "UTC"),
+                        format = ISOStringPrecformatter(precision = precision,
+                                                        desiredZone = c("UTC")))
 
   return(timedateISO)
 
@@ -299,7 +407,7 @@ date_ingest_checker <- function(x, format = c("ISO8601"), precision = NULL,
 # to handle output received from date_ingest_checker()
 
 timestamp_output_formatter <- function(x, precision = NULL, suppOutput = NULL) {
-
+  
   #   x: properly formatted ISO 8601 string (in UTC); in our concept, this would
   #      ideally be the output from date_ingest_checker(); however, the function
   #      is designed to operate by itself with user-supplied arguments
@@ -326,85 +434,41 @@ timestamp_output_formatter <- function(x, precision = NULL, suppOutput = NULL) {
   }
   
   ### First, convert the ISO 8601 string to an R datetime object
-
+  
   # shouldn't need to do any format-checking since we assume this is a correctly
   # formatted ISO 8601 string (ideally, received directly from the
   # date_ingest_checker function)
-
+  
   ISOdate <- parsedate::parse_iso_8601(x)
-
-  ### Generate format string(s) appropriate to desired level of precision
-
-  # main format string
-
-  if (!is.null(precision)) {
-
-    precision <- match.arg(precision,
-                           c("day", "minute", "second", "milliSecond"),
-                           several.ok = FALSE)
-
-    # create appropriate basic format string for level of precision to be
-    # applied, based on function argument
-
-    switch(precision,
-           day = {formatOutISO <- "%Y-%m-%d"},
-           minute = {formatOutISO <- "%Y-%m-%dT%H:%M"},
-           second = {formatOutISO <- "%Y-%m-%dT%H:%M:%S"},
-           milliSecond = {formatOutISO <- "%Y-%m-%dT%H:%M:%OS"}
-    )
-
-  } else {
-
-    # no precision argument suppled: just go out to seconds, consistent with
-    # ISO 8601 specification
-
-    formatOutISO <- "%Y-%m-%dT%H:%M:%S"
-
-  }
-
-  # generate shorter appropriate offset time strings that will be appended to
-  # the main format string generated above; ISO 8601 does not require the offset
-  # designator if only Y-m-d is given
-
-  # have to use as.POSIXlt rather than as.POSIXct for this task so that time zone
-  # conversion works properly
-
-  if (formatOutISO == "%Y-%m-%d") {
-
-    UTC_offsetString <- ""
-    suppOutput_offsetString <- ""
-
-  } else {
-
-    UTC_offsetString <- "+00:00"
-    suppOutput_offsetString <- "%z"
-
-  }
-
+  
   ### Generate the output
-
+  
   # generate the UTC timestamp; store in list object
+  
   dateTimeUTC <- format(as.POSIXlt(x, tz = "UTC"),
-                        format = paste0(formatOutISO, UTC_offsetString))
+                        format = ISOStringPrecformatter(precision = precision,
+                                                        desiredZone = c("UTC")))
   outList <- list("dateTimeUTC" = dateTimeUTC) # create our output list object
-
+  
   # generate the supplementary output, if requested
   if (!is.null(suppOutput)) {
-
+    
     dateTimeSuppOutput <- format(as.POSIXlt(x, tz = suppOutput),
-                                 format = paste0(formatOutISO, suppOutput_offsetString))
+                                 format =
+                                   ISOStringPrecformatter(precision = precision,
+                                                          desiredZone = c("other"))))
 
-    # need to insert the colon in the right place in the optional-timezone output
-    # string to make it ISO 8601 compliant
+# need to insert the colon in the right place in the optional-timezone output
+# string to make it ISO 8601 compliant
 
-    dateTimeSuppOutput <- gsub('^(.*)(.{2})$', '\\1:\\2', dateTimeSuppOutput)
+dateTimeSuppOutput <- addISO8601colon(dateTimeSuppOutput)
 
-    # append the supplemental timestamp to the output list
-    outList$dateTimeSuppOutput <- dateTimeSuppOutput
+# append the supplemental timestamp to the output list
+outList$dateTimeSuppOutput <- dateTimeSuppOutput
 
   }
-
+  
   # return output
   return(outList)
-
+  
 }
