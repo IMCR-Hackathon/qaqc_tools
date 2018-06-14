@@ -5,7 +5,7 @@ A suite of tools addressing common yet critical data curating tasks aimed at the
 ## List of functions
 qaqc_TimeDate_functions: includes a date_ingest_checker function that does (what?)
 
-gap_checker:
+gap_checker: includes gap_checker function that checks for gaps in time sequences which excede a user-defined threshold for data gaps
 
 numeric_functions: includes numeric_range_checker function that applies range limit tests to data frame, and includes skeletons for numeric_slope_checker, numeric_step_checker functions.
 
