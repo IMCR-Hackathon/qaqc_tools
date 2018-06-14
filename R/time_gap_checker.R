@@ -17,6 +17,7 @@
 
 time_gap_checker <- function(dat, datetimeVar, gapThreshold) {
   
+  # confirm that the date time variable is of type posixct or posixlt
   if (!(is.POSIXct(tower[['timestamp']]) | is.POSIXlt(tower[['timestamp']]))) {
     stop("variable to check must be of type POSIXct or type POSIXlt")
   }
@@ -24,11 +25,17 @@ time_gap_checker <- function(dat, datetimeVar, gapThreshold) {
   datetimeVec <- dat[[datetimeVar]]
   timeGap <- datetimeVec - lag(datetimeVec)
   
+  # set gap threshold to the standard deviation of the time step if not provided
   if (missing(gapThreshold)) {
     gapThreshold <- sd(timeGap, na.rm = T)
   }
   
   sequenceGap <- timeGap > gapThreshold
+  
+  # set flags according to:
+  # -1 not run
+  # 0 passed
+  # 1 fail
   sequenceGap <- ifelse(is.na(sequenceGap), -1,
                         ifelse(sequenceGap == TRUE, 1,
                                ifelse(sequenceGap == FALSE, 0, NA)
