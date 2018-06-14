@@ -308,9 +308,23 @@ timestamp_output_formatter <- function(x, precision = NULL, suppOutput = NULL) {
   #      wrapper function (once we build it); if not supplied, we will report
   #      to a precision of seconds (consistent with ISO 8601 specification)
   #  suppOutput ("supplemental output"): optional argument allowing user to
-  #      request timestamp output in "local" or other time zone in addition to
-  #      UTC
-
+  #      request timestamp output in "local" or other time zone/locality in
+  #      addition to UTC; must be something in the Olson list
+  
+  ### Check arguments
+  
+  if (!is.null(suppOutput)) {
+    
+    if (!(suppOutput %in% OlsonNames())) {
+      
+      stop("The time zone or locality supplied for suppOutput must be one of ",
+           "the values present in the R OlsonNames() list. Try OlsonNames() ",
+           "at the R console prompt to view a full list of the valid options.")
+      
+    }
+    
+  }
+  
   ### First, convert the ISO 8601 string to an R datetime object
 
   # shouldn't need to do any format-checking since we assume this is a correctly
