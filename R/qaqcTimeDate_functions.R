@@ -442,7 +442,7 @@ timestamp_output_formatter <- function(x, precision = NULL,
   ### Generate the output
 
   # generate the UTC timestamp; store in list object
-  
+
   attributes(x)$tzone <- "UTC" # convert time to UTC
   dateTimeUTC <- format(x, format = ISOStringPrecformatter(precision = precision,
                                                         desiredZone = c("UTC")))
@@ -451,7 +451,7 @@ timestamp_output_formatter <- function(x, precision = NULL,
 
   # generate the supplementary output, if requested
   if (!is.null(suppOutput)) {
-    
+
     attributes(x)$tzone <- suppOutput # convert time to whatever TZ user wants
     dateTimeSuppOutput <- format(x, format = ISOStringPrecformatter(precision = precision,
                                                           desiredZone = c("other")))
