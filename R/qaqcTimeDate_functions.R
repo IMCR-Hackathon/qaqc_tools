@@ -164,7 +164,7 @@ addISO8601colon <- function(ISOstring) {
 ### date_ingest_checker: Workhorse function for initial ingestion and formatting
 
 date_ingest_checker <- function(x, format = NULL, precision = NULL,
-                                TZ = NULL, outType = "POSIXct") {
+                                TZ = NULL) {
   
   #   x: some input string that contains the dateTime data [string]
   #   format: a format string we can pass to strptime, or NULL; if NULL, we will
@@ -176,8 +176,8 @@ date_ingest_checker <- function(x, format = NULL, precision = NULL,
   #   TZ: optional argument specifying the timezone in which the dateTime data
   #      was collected; must be in the OlsonNames() list [string]; if not
   #      specified, uses whatever is given in the format string for %z or %Z
-  #   outType: form of the data to be returned by the function; can have values
-  #      of "POSIXct","POSIXlt", or "stringISO"; defaults to POSIXct [string]
+
+  # date_ingest_checker returns a timestamp as POSIXct format
   
   ### Initial checks on formatting of the input string and the timezone
   
@@ -389,15 +389,7 @@ date_ingest_checker <- function(x, format = NULL, precision = NULL,
     
   }
   
-  ### Generate, return function output
-  # final output as an ISO character string
-  
-  switch(outType,
-         stringISO = {timedate <- format(as.POSIXlt(timedate, tz = "UTC"),
-                                         format = ISOStringPrecformatter(precision = precision,
-                                                                         desiredZone = c("UTC")))},
-         POSIXlt = {timedate <- as.POSIXlt(timedate)}
-  )
+  ### Generate, return function output as POSIXct
   
   return(timedate)
   
@@ -405,18 +397,19 @@ date_ingest_checker <- function(x, format = NULL, precision = NULL,
 
 ### timestamp_output_formatter
 
-# Takes an ISO 8601 string in UTC, combines with precision argument
-# (if supplied), and returns another ISO 8601 string that has the appropriate
-# level of precision. Optionally, also returns the same datetime for a
-# "alternate" time zone other than UTC; this would allow user to easily evaluate
-# whether output makes sense based on their knowledge of the input data.
+# Takes a POSIXct object, combines with precision argument (if supplied), 
+# and returns an ISO 8601 text string that has the appropriate level of
+# precision. Optionally, also returns the same datetime for a "alternate" time
+# zone other than UTC; this would allow user to easily evaluate whether output
+# makes sense based on their knowledge of the input data.
 
-# We envision that this function would be incorporated into a wrapper function
+# We envision that this function could be incorporated into a wrapper function
 # to handle output received from date_ingest_checker()
 
-timestamp_output_formatter <- function(x, precision = NULL, suppOutput = NULL) {
+timestamp_output_formatter <- function(x, precision = NULL,
+                                       suppOutput = NULL) {
 
-  #   x: properly formatted ISO 8601 string (in UTC); in our concept, this would
+  #   x: a POSIXct object; in our concept, this would
   #      ideally be the output from date_ingest_checker(); however, the function
   #      is designed to operate by itself with user-supplied arguments
   #   precision: optional argument, may be passed along from the value user
@@ -440,20 +433,18 @@ timestamp_output_formatter <- function(x, precision = NULL, suppOutput = NULL) {
     }
 
   }
-
-  ### First, convert the ISO 8601 string to an R datetime object
-
-  # shouldn't need to do any format-checking since we assume this is a correctly
-  # formatted ISO 8601 string (ideally, received directly from the
-  # date_ingest_checker function)
-
-  ISOdate <- parsedate::parse_iso_8601(x)
+  
+  if (!is(x, "POSIXct")) {
+    
+    stop("Input must be an object of class 'POSIXct'\n")
+    
+  }
 
   ### Generate the output
 
   # generate the UTC timestamp; store in list object
 
-  dateTimeUTC <- format(as.POSIXlt(ISOdate, tz = "UTC"),
+  dateTimeUTC <- format(as.POSIXlt(x, tz = "UTC"),
                         format = ISOStringPrecformatter(precision = precision,
                                                         desiredZone = c("UTC")))
 
@@ -462,7 +453,7 @@ timestamp_output_formatter <- function(x, precision = NULL, suppOutput = NULL) {
   # generate the supplementary output, if requested
   if (!is.null(suppOutput)) {
 
-    dateTimeSuppOutput <- format(as.POSIXlt(ISOdate, tz = suppOutput),
+    dateTimeSuppOutput <- format(as.POSIXlt(x, tz = suppOutput),
                                  format =
                                    ISOStringPrecformatter(precision = precision,
                                                           desiredZone = c("other")))
