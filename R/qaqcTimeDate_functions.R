@@ -134,16 +134,16 @@ addISO8601colon <- function(ISOstring) {
   
   # detect whether the string has a colon in it already
   
-  if (grepl('^(.*)\\+(.{2})\\:(.{2})$', ISOstring)) {
+  if (grepl('^(.*)[\\+\\-](.{2})\\:(.{2})$', ISOstring)) {
     
     # appears to be an ISO string with a colon already; just return output
     
-    cat("Your string appears to have a colon in it already; returning it ",
+    cat("Your string appears to have a colon in it already; returning it",
         "unaltered.\n")
     
     ISOstringout <- ISOstring
     
-  } else if (grepl('^(.*)\\+(.{4})$', ISOstring)) {
+  } else if (grepl('^(.*)[\\+\\-](.{4})$', ISOstring)) {
     
     # appears to be an ISO 8601 string having a four digit offset without a
     # colon 
@@ -152,8 +152,8 @@ addISO8601colon <- function(ISOstring) {
     
   } else {
     
-    stop("Input doesn't appear to be a properly formatted ISO 8601 timestamp.",
-         "\n")
+    stop("Input doesn't appear to be a properly formatted ISO 8601 timestamp ",
+         "with a numeric time offset component.\n")
     
   }
   
@@ -455,27 +455,28 @@ timestamp_output_formatter <- function(x, precision = NULL, suppOutput = NULL) {
   
   # generate the UTC timestamp; store in list object
   
-  dateTimeUTC <- format(as.POSIXlt(x, tz = "UTC"),
+  dateTimeUTC <- format(as.POSIXlt(ISOdate, tz = "UTC"),
                         format = ISOStringPrecformatter(precision = precision,
                                                         desiredZone = c("UTC")))
+  
   outList <- list("dateTimeUTC" = dateTimeUTC) # create our output list object
   
   # generate the supplementary output, if requested
   if (!is.null(suppOutput)) {
     
-    dateTimeSuppOutput <- format(as.POSIXlt(x, tz = suppOutput),
+    dateTimeSuppOutput <- format(as.POSIXlt(ISOdate, tz = suppOutput),
                                  format =
                                    ISOStringPrecformatter(precision = precision,
                                                           desiredZone = c("other")))
-
-# need to insert the colon in the right place in the optional-timezone output
-# string to make it ISO 8601 compliant
-
-dateTimeSuppOutput <- addISO8601colon(dateTimeSuppOutput)
-
-# append the supplemental timestamp to the output list
-outList$dateTimeSuppOutput <- dateTimeSuppOutput
-
+    
+    # need to insert the colon in the right place in the optional-timezone output
+    # string to make it ISO 8601 compliant
+    
+    dateTimeSuppOutput <- addISO8601colon(dateTimeSuppOutput)
+    
+    # append the supplemental timestamp to the output list
+    outList$dateTimeSuppOutput <- dateTimeSuppOutput
+    
   }
   
   # return output
