@@ -325,14 +325,16 @@ date_ingest_checker <- function(x, format = c("ISO8601"), precision = NULL,
 
   alreadyInUTC <- grepl("Z$", x) # yields true or false
 
-  if (!alreadyInUTC) {
-
-    cat("User did not specify a time zone. Attempting to detect time ",
-        "zone from supplied data...\n")
-
-    TZ <- gsub(, "")
-
-  }
+  ## *** Need to figure out what is going on with the below ***
+  
+  # if (!alreadyInUTC) {
+  # 
+  #   cat("User did not specify a time zone. Attempting to detect time ",
+  #       "zone from supplied data...\n")
+  # 
+  #   TZ <- gsub(, "")
+  # 
+  # }
 
     # check for precision input
 
