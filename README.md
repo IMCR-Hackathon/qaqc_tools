@@ -3,7 +3,8 @@
 A suite of tools addressing common yet critical data curating tasks aimed at the particular needs of the LTER research and Information Managers community, and that also that applies to the QA/QC needs of the broader research community. These tools are designed to automated quality control of sensor data, but may also be useful for non-sensor data sets.
 
 ## List of functions
-qaqc_TimeDate_functions: includes a date_ingest_checker function that does (what?)
+qaqc_TimeDate_functions: Functions for working with timestamps and dates and times in
+environmental data. Contains functions for ingesting, formatting, and detecting/manipulating time zones given different kinds of supplied timestamps
 
 gap_checker: includes gap_checker function that checks for gaps in time sequences which excede a user-defined threshold for data gaps
 
