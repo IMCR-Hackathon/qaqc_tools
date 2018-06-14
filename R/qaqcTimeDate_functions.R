@@ -89,7 +89,7 @@ ISOStringPrecformatter <- function(precision = NULL,
            day = {formatOutISO_base <- "%Y-%m-%d"},
            minute = {formatOutISO_base <- "%Y-%m-%dT%H:%M"},
            second = {formatOutISO_base <- "%Y-%m-%dT%H:%M:%S"},
-           milliSecond = {formatOutISO_base <- "%Y-%m-%dT%H:%M:%OS"}
+           milliSecond = {formatOutISO_base <- "%Y-%m-%dT%H:%M:%OS3"}
     )
     
     }
