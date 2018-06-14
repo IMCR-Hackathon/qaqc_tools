@@ -5,9 +5,10 @@
 # detecting/manipulating time zones given different kinds of supplied timestamps
 
 # Dependencies: parse_iso_8601(), format_iso_8601() functions from package
-# parsedate
+# parsedate; hasArg from methods
 
 # library(parsedate)
+# library(methods)
 
 ### handleTimestamp
 
@@ -54,7 +55,7 @@ ISOStringPrecformatter <- function(precision = NULL,
   
   # check for desiredZone argument
   
-  if (is.null(desiredZone)) {
+  if (!methods::hasArg(desiredZone) || (is.null(desiredZone))) {
     
     stop("Must specify a desiredZone to generate the right format string.")
     
@@ -456,7 +457,7 @@ timestamp_output_formatter <- function(x, precision = NULL, suppOutput = NULL) {
     dateTimeSuppOutput <- format(as.POSIXlt(x, tz = suppOutput),
                                  format =
                                    ISOStringPrecformatter(precision = precision,
-                                                          desiredZone = c("other"))))
+                                                          desiredZone = c("other")))
 
 # need to insert the colon in the right place in the optional-timezone output
 # string to make it ISO 8601 compliant
