@@ -9,31 +9,20 @@ gap_checker: includes gap_checker function that checks for gaps in time sequence
 
 numeric_functions: includes numeric_range_checker function that applies range limit tests to data frame, and includes skeletons for numeric_slope_checker, numeric_step_checker functions.
 
-### Date/Time Issues
+### qaqc_TimeDate_functions
 
-  # provide user with warnings and messages
+  Provides user with warnings and messages: check for precision input, check for TZ input, check for format input
 
-      # check for precision input
+  Where possible, tries to detect precision, TZ, and date-time format without being too liberal in its assumptions. If cannot be reliably determined, stops and provides user with message as to why it failed.
 
-  # check for TZ input
+  Several date-time formats are supported including ISO8601, AM/PM
 
-  # check for format input
-
-```R
-date_ingest_checker <- function(x, precision, TZ) {
-
-    # x: some input string we believe to be a time stamp
-    # optional arguments: precision, TZ (will be detected automatically if present in the data)
-
-  # Description:
-  1. Detemine input format
-      Accept ISO format
-      Accept 24 hour or 12 hour plus AM/PM
-
+  #### Description:
+  1. Determine input format
   2. Determine precision for output format based on input information
   3. If data isn't a valid format output why to user for gathering correct information
   4. Allow users to specify a specific precision, e.g. hour and minutes, or just date that is expected/required. Require year, month, and day at a minimum
-  5. Require unambiguous input timezone (requires legwork to determine, likely not automatable, but may be consisitent over time for a site or type of data)
+  5. Require unambiguous input timezone (requires legwork to determine, likely not automatable, but may be consistent over time for a site or type of data)
   ** Provide feedback to user informing them which TZ was recognized & applied
       Additional dataframe with timezones by station/site
       Timezone in input dateTimes
@@ -42,13 +31,15 @@ date_ingest_checker <- function(x, precision, TZ) {
   6. Clean input times to be in ISO format
       YYYY-MM-DDTHH:MM:SS.SSSZ
   7. Convert to R dateTime object (POSIXct or POSIXlt?)
-
-  ** Provide feedback to user: timestamp minimum/maximum in UTC and in TZ of input data, if TZ was given in input data
-  8. Plot review of earlierst/latest/disctributin of times to the user to check that the dates/times are reasonable (descTools?)
-  9. Output dataframe with columns appended for input TZ and input precision (maybe check is they're all the same and output another way? Separate table?)
+  8. Output dataframe with columns appended for input TZ and input precision (maybe check is they're all the same and output another way? Separate table?)
       TZ is a string value
       Precision options: day, minute, second, milliSecond
-}
+
+```
+date_ingest_checker <- function(x, precision, TZ) {
+
+    # x: some input string we believe to be a time stamp
+    # optional arguments: precision, TZ (will be detected automatically if present in the data)
 ```
 
 ```R
@@ -64,12 +55,15 @@ timestamp_output_formatter <- function(x, precision, suppOutput) {
       3. Remove extra columns from dataframe for input timezone and precision and create an output similar to the ingest provenance output
 
   (fail or fix?).
-  
+
+
+}
+```
 
 Outstanding/unresolved issues for the date-time working group:
     1. What does format of provenance information look like? Harmonize with whatever format the ingest group is coming up with?
-}
-```
+    2. Provide summary feedback to user: timestamp minimum/maximum in UTC and in TZ of input data, if TZ was given in input data
+    3. Plot review of frequency distribution of times to the user to check that the dates/times are reasonable (descTools?)
 
 ```R
 sorted_by_timestamp <- function(x) {
