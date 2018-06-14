@@ -1,8 +1,13 @@
 # qaqc\_tools
 
-A suite of tools to address common yet critical data curating tasks to address the particular needs of the LTER research community, but that  also that apply to QC needs of the broader research community.
+A suite of tools addressing common yet critical data curating tasks aimed at the particular needs of the LTER research and Information Managers community, and that also that applies to the QA/QC needs of the broader research community. These tools are designed to automated quality control of sensor data, but may also be useful for non-sensor data sets.
 
 ## List of functions
+qaqc_TimeDate_functions: includes a date_ingest_checker function that does (what?)
+
+gap_checker:
+
+numeric_functions: includes numeric_range_checker function that applies range limit tests to data frame, and includes skeletons for numeric_slope_checker, numeric_step_checker functions.
 
 ### Date/Time Issues
 
