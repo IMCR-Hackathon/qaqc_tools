@@ -286,7 +286,7 @@ date_ingest_checker <- function(x, Format = NULL, precision = NULL,
 
   } else {
 
-    if (grepl("[A-Za-z]",x)&&!grepl("T",x)) {
+    if (grepl("[A-Za-z]",x)&&!grepl("T|AM|PM",x)) {
 
       stop("Format does not include a string other than ISO 'T' in date ",
            "format found. Cannot proceed with date string containing ",
@@ -442,7 +442,7 @@ timestamp_output_formatter <- function(x, precision = NULL,
   ### Generate the output
 
   # generate the UTC timestamp; store in list object
-  
+
   dateTimeUTC <- format(testtime,
                         format = ISOStringPrecformatter(precision = precision,
                                                         desiredZone = c("UTC")),
@@ -452,7 +452,7 @@ timestamp_output_formatter <- function(x, precision = NULL,
 
   # generate the supplementary output, if requested
   if (!is.null(suppOutput)) {
-    
+
     dateTimeSuppOutput <- format(x,
                                  format = ISOStringPrecformatter(precision = precision,
                                                           desiredZone = c("other")),
