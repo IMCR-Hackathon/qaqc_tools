@@ -77,6 +77,27 @@ all.equal(attributes(test2)$range_fails,
 
 
 
+numeric_step_checker <- function(x,stepMax=NA,verbose=FALSE) {
+  # if stepMax isn't specified, try to define a step based on 
+  # the variance of the data stream. Default is 1.96*standard deviation
+  # of the sequential differences
+  # NOTE if the default step is used, about 5% of the data will be flagged
+  # even if there are no real problems with the data
+  stepMax<-ifelse(is.na(stepMax),(1.96*sd(diff(x,lag=1),na.rm=TRUE)),stepMax)
+  
+  isStep <- abs(diff(x,lag=1)) > stepMax
+  result<-ifelse(isStep,1,0)
+  # make the result vector length the same as x
+  result<-append(-1,result)
+  result<-ifelse(is.na(result),-1,result)
+  if (verbose){
+    print(paste("Looking for jumps or drops in the data > ",stepMax,sep=''))
+    print("Frequency of result codes:")
+    print(summary(as.factor(result)))
+  }
+  return(result)
+}
+
 numeric_slope_checker <- function(dat1, dat2, dat3, ...) {
   
   # Description: test sensor drift - requires at least three sensor readings with
@@ -86,8 +107,6 @@ numeric_slope_checker <- function(dat1, dat2, dat3, ...) {
   # Tests:
   # Examples:
 }
-
-
 
 numeric_spike_window_checker <- function(dat, 
                                          spike_value = c(3, 5), 
@@ -143,15 +162,47 @@ all.equal(out[[36]],
           c(12,  7,  8, 14, 10))
 all.equal(out[[1]], 
           c(14, 8, 11, 12, 11))
-  
-  if all NA
-  if one_non_NA
-  if >= 2 non_NA (range, na.rm = TRUE
-                  
+
+# https://dsp.stackexchange.com/questions/30213/spikes-in-time-series
+# Let your original signal be f[n]
+# Median filter f[n]
+# using N pixels, where N>2×S+1, where S is the maximum number of samples in the spike. 
+# The resulting signal, lets call it g[n]
+# should have all the spikes removed.
+# Find the absolute of the difference between the two signals, h[n]=|f[n]−g[n]|
+# This signal represents the spikes.
+
+# Count the number of positive transitions in h[n]
+# that are above a threshold. This is the number of spikes.
+
+
+dat <- t
+numeric_spike_med_filter_check <- function(dat, thresh = NULL, 
+                                           win_size = NULL, ...) {
+  # Needs NA handling and more tests
+  # better default win_size based on length of data and NA freq
+  # NEON code def.dspk.window.R
+  # # Store na positions as "unable to evaluate" spikes
+  # posSpk[[idxVar]]$posQfSpk$na <- which(is.na(trns))
+  # 
+  # if(Trt$NaTrt == "approx") {
+  #   trns <- approx(x=index(trns), y=trns, xout=index(trns))$y
+  # }
+  if (is.null(thresh)) {
+    out <- moving_windows(dat = dat, win_size = win_size)
+    thresh <- 2 * median(unlist( lapply(out, sd, na.rm = TRUE)))
+    # unlist( lapply(out, mad, na.rm = TRUE))
+    # unlist( lapply(out, median, na.rm = TRUE))
+  }
+  if (is.null(win_size)) win_size <- 5
+
+  med_smoothed <- runmed(x = dat, k = win_size)
+  resids <- abs(dat - med_smoothed)
+  fails <- which(resids > thresh)
+  attr(dat, "spike_med_filter_fails") <- fails
+  return(dat)
+
 }
-
-mav <- function(x,n=5){filter(x,rep(1/n,n), sides=2)} #Average
-
 
 # https://dsp.stackexchange.com/questions/30213/spikes-in-time-series
 # Let your original signal be f[n]
@@ -229,8 +280,17 @@ numeric_spike_checker <- function(x, spike_min = NA, verbose = FALSE) {
   }
   return(result)
 }
-}
 
+# numeric_slope_checker <- function(dat1, dat2, dat3, ...) {
+#   
+#   # Description: test sensor drift - requires at least three sensor readings with
+#   # concurrent measurements
+#   # Inputs:
+#   # Returns:
+#   # Tests:
+#   # Examples:
+
+}
 
 
 complete_cases_checker <- function(x) {
