@@ -1,0 +1,23 @@
+Package: qaqcr
+Type: Package
+Title: An R package to Conduct QAQC on Environmental Data 
+Version: 0.1.0
+Authors@R: c(
+  person("Patrick", "Kilduff", email = "dpkilduff@yahoo.com", role = c("aut", "cre")),
+  person("Amanda", "Droghini", email = "adroghini@alaska.edu", role = c("aut")),
+  person("Jamie", "Collins", email = "james.r.collins@aya.yale.edu", role = c("aut")),
+  person("Celeste", "Dodge", email = "cdodge@pepperwoodpreserve.org", role = c("aut")),
+  person("John", "Porter", email = "jhp7e@virginia.edu", role = c("aut")),
+  person("Kaelin", "Cawley", email = "kcawley@battelleecology.org", role = c("aut")),
+  person("Stevan", "Earl", email = "stevan.earl@asu.edu", role = c("aut")),
+  person("Kristin", "Vanderbilt", email = "krvander@fiu.edu", role = c("aut"))
+  )
+Description: This represents the initial steps in an ongoing project began at the inagural IMCR Hackathon. The end product of this effort will be an R package on GitHub and, possibly, CRAN. The package will focus on conducting quality control data for issues common to environmental monitoring and research data and is designed to work in conjunction with the R package `ingestr` (https://github.com/jpshanno/ingestr).
+License: file LICENSE
+Encoding: UTF-8
+LazyData: true
+URL: https://github.com/jpshanno/ingestr
+BugReports: https://github.com/jpshanno/ingestr/issues
+Imports:
+Suggests:
+RoxygenNote: 6.0.1

@@ -1,0 +1,10 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^data-raw$
+^CONTRIBUTING\.md$
+^\.travis\.yml$
+^codecov\.yml$
+^README\.Rmd$
+^README-.*\.png$
+^inst\img$
+^appveyor\.yml$
