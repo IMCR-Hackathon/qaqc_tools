@@ -1,0 +1,13 @@
+Package: dateCheckR
+Title: Checks, creates POSIXct objects, and outputs pretty string format dates and times
+Version: 0.0.0.9000
+Authors@R: person("Kaelin", "Cawley", email = "kcawley@battelleecology.org", role = c("aut", "cre"))
+Description: This package contains functions to read in dates, times, and timestamps in string 
+	format and convert to POSIXct objects for QAQC. In addition, it contains functions that 
+	support outputing string format dates with a specified precision in a specified timezone.
+Depends: R (>= 3.5)
+Imports: methods
+License: AGPL-3 + file LICENSE
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.1.0
