@@ -17,6 +17,11 @@
 #' @param TZ optional argument specifying the timezone in which the dateTime data was 
 #' collected;must be in the OlsonNames list; if not specified, uses whatever is given 
 #' in the format string for \%z or \%Z [character]
+#' @param check User input of TRUE or FALSE of whether or not to check timestamp against a 
+#' range of valid values [boolean]
+#' @param checkMin User input of minimum valid dateTime range, default 1980-01-01 [POSIXct]
+#' @param checkMax User input of maximum valid dateTime range, default 
+#' system time + 24 hours [POSIXct]
 
 #' @return a timestamp as POSIXct format [POSIXct]
 
@@ -42,7 +47,10 @@
 date_ingest_checker <- function(x, 
                                 Format = NULL, 
                                 precision = NULL,
-                                TZ = NULL) {
+                                TZ = NULL,
+                                check = TRUE,
+                                checkMin = as.POSIXct("1980-01-01"),
+                                checkMax = as.POSIXct(Sys.time() + 86400)) {
 
 
   ### Initial checks on formatting of the input string and the timezone
@@ -147,10 +155,15 @@ date_ingest_checker <- function(x,
     # set the TZ to timeZone if there wasn't one specified in the input
     TZ = timeZone
 
-  } else if (is.null(TZ)) {
+  } else if (is.null(TZ) && precision!="day") {
 
     stop("Error, no timezone input and no timezone could be parsed from data.")
 
+  } else if (is.null(TZ) && precision=="day") {
+    
+    TZ = "UTC"
+    cat("Warning, a timezone of UTC will be used for dates without times. Specify a timezone using the TZ input parameter to choose a different timezone.\n")
+    
   } else {
 
     if (grepl("[A-Za-z]",x)&&!grepl("T|AM|PM",x)) {
@@ -254,7 +267,22 @@ date_ingest_checker <- function(x,
     timedate <- as.POSIXct(x,tz = TZ, format = Format)
 
   }
-
+  
+  #Check date object is within common sense range check
+  if (check) {
+    
+    if(timedate<checkMin){
+      
+      stop(paste0("Date and/or time earlier than ",checkMin,"\n"))
+      
+    } else if (timedate>checkMax){
+      
+      stop(paste0("Date and/or time later than ",checkMax,"\n"))
+      
+    }
+    
+  }
+  
   ### Generate, return function output as POSIXct
   return(timedate)
 

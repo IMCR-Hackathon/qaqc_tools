@@ -4,7 +4,9 @@
 \alias{date_ingest_checker}
 \title{Checks timestamp inputs and converts to POSIXct R object}
 \usage{
-date_ingest_checker(x, Format = NULL, precision = NULL, TZ = NULL)
+date_ingest_checker(x, Format = NULL, precision = NULL, TZ = NULL,
+  check = TRUE, checkMin = as.POSIXct("1980-01-01"),
+  checkMax = as.POSIXct(Sys.time() + 86400))
 }
 \arguments{
 \item{x}{some input string that contains the dateTime data [character]}
@@ -18,6 +20,13 @@ or "milliSecond" for the input and output; if not specified [character]}
 \item{TZ}{optional argument specifying the timezone in which the dateTime data was 
 collected;must be in the OlsonNames list; if not specified, uses whatever is given 
 in the format string for \%z or \%Z [character]}
+
+\item{check}{User input of TRUE or FALSE of whether or not to check timestamp against a 
+range of valid values [boolean]}
+
+\item{checkMin}{User input of minimum valid dateTime range [POSIXct]}
+
+\item{checkMax}{User input of maximum valid dateTime range [POSIXct]}
 }
 \value{
 a timestamp as POSIXct format [POSIXct]
